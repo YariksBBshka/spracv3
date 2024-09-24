@@ -1,0 +1,58 @@
+package com.example.dust.controller;
+
+import com.example.dust.domain.Appointment;
+import com.example.dust.dto.AppointmentBookingDTO;
+import com.example.dust.services.AppointmentService;
+import com.example.dust.services.DoctorService;
+import com.example.dust.services.PatientService;
+import com.example.dust.services.impl.AppointmentServiceImpl;
+import com.example.dust.services.impl.DoctorServiceImpl;
+import com.example.dust.services.impl.PatientServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/appointment")
+public class AppointmentController {
+    @Autowired
+    private AppointmentServiceImpl appointmentService;
+
+    private PatientServiceImpl patientService;
+
+    private DoctorServiceImpl doctorService;
+
+    public AppointmentController(DoctorServiceImpl doctorService, PatientServiceImpl patientService, AppointmentServiceImpl appointmentService) {
+        this.doctorService = doctorService;
+        this.patientService = patientService;
+        this.appointmentService = appointmentService;
+    }
+
+    @GetMapping("/")
+    public List<AppointmentBookingDTO> getAllAppointments() {
+        return appointmentService.getAll();
+    }
+
+    @PostMapping("/booking")
+    public AppointmentBookingDTO createAppointment(@RequestBody AppointmentBookingDTO appointmentBookingDTO) {
+        return appointmentService.create(appointmentBookingDTO);
+    }
+
+    @PostMapping("/complete/{id}")
+    public void completeAppointment(@PathVariable Integer id) {
+        appointmentService.completeAppointment(appointmentService.getById(id));
+    }
+
+    @PostMapping("/cancel/{id}")
+    public void cancelAppointment(@PathVariable Integer id) {
+        appointmentService.cancelAppointment(appointmentService.getById(id));
+    }
+
+    @GetMapping("/appointmentHistory/{id}")
+    public List<AppointmentBookingDTO> getHistory(@PathVariable Integer id) {
+        return appointmentService.getAHistory(id);
+    }
+
+}

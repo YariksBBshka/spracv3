@@ -12,8 +12,12 @@ import java.util.UUID;
 
 public interface AppointmentService{
     boolean isTimeAvailable(Doctor doctor, LocalDate date, LocalTime time, Patient patient);
+
+    boolean isTimeAvailable(Doctor doctor, LocalDate date, LocalTime time);
+
     boolean isTimeSlotConflicting(LocalTime timeSlot, LocalTime appointmentTime);
     Appointment completeAppointment(Appointment appointment);
     Appointment cancelAppointment(Appointment appointment);
     List<AppointmentBookingDTO> getAHistory(Integer id);
+
 }

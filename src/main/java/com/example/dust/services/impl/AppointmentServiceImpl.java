@@ -64,6 +64,7 @@ public class AppointmentServiceImpl implements AppointmentService{
         return false;
     }
 
+
     @Override
     public boolean isTimeAvailable(Doctor doctor, LocalDate date, LocalTime time) {
         List<Appointment> appointments = appointmentRepository.findByFkDoctorAndAppointmentDate(doctor, date)
@@ -82,9 +83,8 @@ public class AppointmentServiceImpl implements AppointmentService{
             return false;
         }
 
-        return !time.isBefore(LocalTime.of(10, 0)) && !time.isAfter(LocalTime.of(18, 0));
+        return true;
     }
-
 
 
     @Override
@@ -124,33 +124,19 @@ public class AppointmentServiceImpl implements AppointmentService{
     @Override
     public List<LocalTime> getAvailableTimeSlots(Integer doctorId, LocalDate date) {
         Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();
-        List<Appointment> appointments = appointmentRepository.findByFkDoctorAndAppointmentDate(doctor, date)
-                .stream()
-                .filter(appointment -> !appointment.getStatus().equals(AppointmentStatus.CANCELLED) &&
-                        !appointment.getStatus().equals(AppointmentStatus.COMPLETED))
-                .collect(Collectors.toList());
-
         LocalTime startTime = LocalTime.of(10, 0);
         LocalTime endTime = LocalTime.of(18, 0);
         List<LocalTime> availableSlots = new ArrayList<>();
 
         for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(25)) {
-            boolean isAvailable = true;
-
-            for (Appointment appointment : appointments) {
-                if (isTimeSlotConflicting(time, appointment.getAppointmentTime())) {
-                    isAvailable = false;
-                    break;
-                }
-            }
-
-            if (isAvailable && !(time.isAfter(LocalTime.of(12, 40)) && time.isBefore(LocalTime.of(14, 0)))) {
+            if (isTimeAvailable(doctor, date, time)) {
                 availableSlots.add(time);
             }
         }
 
         return availableSlots;
     }
+
 
 
     @Override

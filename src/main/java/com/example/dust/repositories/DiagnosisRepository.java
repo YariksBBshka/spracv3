@@ -6,7 +6,7 @@ import com.example.dust.domain.Diagnosis;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+
 
 public interface DiagnosisRepository {
     List<Diagnosis> findByPatientId(Integer patientId);

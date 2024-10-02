@@ -4,10 +4,19 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class AppointmentBookingDTO {
+    private Integer appointmentId;
     private Integer doctorId;
     private Integer patientId;
     private LocalDate localDate;
     private LocalTime localTime;
+
+    public Integer getAppointmentId() {
+        return appointmentId;
+    }
+
+    public void setAppointmentId(Integer appointmentId) {
+        this.appointmentId = appointmentId;
+    }
 
     public Integer getDoctorId() {
         return doctorId;

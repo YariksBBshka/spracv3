@@ -158,7 +158,10 @@ public class AppointmentServiceImpl implements AppointmentService{
         Appointment appointment = new Appointment(appointmentDate, appointmentTime, AppointmentStatus.BOOKED, doctor, patient);
 
         if (isTimeAvailable(doctor, appointmentDate, appointmentTime, patient)) {
-            return modelMapper.map(appointmentRepository.save(appointment), AppointmentBookingDTO.class);
+            Appointment savedAppointment = appointmentRepository.save(appointment);
+            AppointmentBookingDTO responseDto = modelMapper.map(savedAppointment, AppointmentBookingDTO.class);
+            responseDto.setAppointmentId(savedAppointment.getId());
+            return responseDto;
         } else {
             throw new RuntimeException("Time is not available");
         }

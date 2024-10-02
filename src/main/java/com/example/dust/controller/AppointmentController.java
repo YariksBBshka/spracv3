@@ -1,10 +1,8 @@
 package com.example.dust.controller;
 
-import com.example.dust.domain.Appointment;
+
 import com.example.dust.dto.AppointmentBookingDTO;
-import com.example.dust.services.AppointmentService;
-import com.example.dust.services.DoctorService;
-import com.example.dust.services.PatientService;
+import com.example.dust.dto.AppointmentDTO;
 import com.example.dust.services.impl.AppointmentServiceImpl;
 import com.example.dust.services.impl.DoctorServiceImpl;
 import com.example.dust.services.impl.PatientServiceImpl;
@@ -22,18 +20,13 @@ public class AppointmentController {
     @Autowired
     private AppointmentServiceImpl appointmentService;
 
-    private PatientServiceImpl patientService;
 
-    private DoctorServiceImpl doctorService;
-
-    public AppointmentController(DoctorServiceImpl doctorService, PatientServiceImpl patientService, AppointmentServiceImpl appointmentService) {
-        this.doctorService = doctorService;
-        this.patientService = patientService;
+    public AppointmentController(AppointmentServiceImpl appointmentService) {
         this.appointmentService = appointmentService;
     }
 
     @GetMapping("/")
-    public List<AppointmentBookingDTO> getAllAppointments() {
+    public List<AppointmentDTO> getAllAppointments() {
         return appointmentService.getAll();
     }
 

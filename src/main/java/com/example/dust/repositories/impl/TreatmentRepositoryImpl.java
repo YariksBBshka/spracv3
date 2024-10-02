@@ -1,6 +1,6 @@
 package com.example.dust.repositories.impl;
 
-import com.example.dust.domain.Diagnosis;
+
 import com.example.dust.domain.Treatment;
 import com.example.dust.repositories.TreatmentRepository;
 import jakarta.persistence.EntityManager;

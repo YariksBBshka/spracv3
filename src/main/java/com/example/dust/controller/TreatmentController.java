@@ -1,7 +1,6 @@
 package com.example.dust.controller;
 
-import com.example.dust.domain.Diagnosis;
-import com.example.dust.dto.DiagnosisDTO;
+
 import com.example.dust.dto.TreatmentDTO;
 import com.example.dust.services.impl.DiagnosisServiceImpl;
 import com.example.dust.services.impl.TreatmentServiceImpl;

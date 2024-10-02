@@ -2,6 +2,7 @@ package com.example.dust.services.impl;
 
 import com.example.dust.domain.Patient;
 import com.example.dust.dto.PatientDTO;
+import com.example.dust.repositories.PatientRepository;
 import com.example.dust.repositories.impl.PatientRepositoryImpl;
 import com.example.dust.services.PatientService;
 import org.modelmapper.ModelMapper;
@@ -14,43 +15,47 @@ import java.util.stream.Collectors;
 @Service
 public class PatientServiceImpl implements PatientService {
 
-    private final PatientRepositoryImpl patientRepositoryImpl;
+    private final PatientRepository patientRepository;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public PatientServiceImpl(PatientRepositoryImpl patientRepositoryImpl) {
-        this.patientRepositoryImpl = patientRepositoryImpl;
+    public PatientServiceImpl(PatientRepositoryImpl patientRepository) {
+        this.patientRepository = patientRepository;
         this.modelMapper = new ModelMapper();
     }
 
     public PatientDTO create(PatientDTO patientDTO) {
         Patient patient = modelMapper.map(patientDTO, Patient.class);
-        patientRepositoryImpl.save(patient);
+        patientRepository.save(patient);
         return patientDTO;
     }
 
+    @Override
     public PatientDTO getById(Integer id) {
-        Patient patient = patientRepositoryImpl.findById(id).orElse(null);
+        Patient patient = patientRepository.findById(id).orElse(null);
         if (patient != null) {
             return modelMapper.map(patient, PatientDTO.class);
         }
         return null;
     }
 
+    @Override
     public List<PatientDTO> getAll() {
-        return patientRepositoryImpl.findAll().stream()
+        return patientRepository.findAll().stream()
                 .map(patient -> modelMapper.map(patient, PatientDTO.class))
                 .collect(Collectors.toList());
     }
 
+    @Override
     public PatientDTO update(PatientDTO patientDTO) {
         Patient patient = modelMapper.map(patientDTO, Patient.class);
-        Patient updatedPatient = patientRepositoryImpl.update(patient);
+        Patient updatedPatient = patientRepository.update(patient);
         return modelMapper.map(updatedPatient, PatientDTO.class);
     }
 
+    @Override
     public PatientDTO findByPhoneNumber(String phoneNumber) {
-        Patient patient = patientRepositoryImpl.findByPhoneNumber(phoneNumber);
+        Patient patient = patientRepository.findByPhoneNumber(phoneNumber);
         return modelMapper.map(patient, PatientDTO.class);
     }
 }

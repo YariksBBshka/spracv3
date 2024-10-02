@@ -5,9 +5,10 @@ import com.example.dust.domain.Patient;
 import com.example.dust.domain.enums.AppointmentStatus;
 import com.example.dust.domain.enums.PatientStatus;
 import com.example.dust.dto.AppointmentBookingDTO;
-import com.example.dust.repositories.impl.AppointmentRepositoryImpl;
-import com.example.dust.repositories.impl.DoctorRepositoryImpl;
-import com.example.dust.repositories.impl.PatientRepositoryImpl;
+import com.example.dust.dto.AppointmentDTO;
+import com.example.dust.repositories.AppointmentRepository;
+import com.example.dust.repositories.DoctorRepository;
+import com.example.dust.repositories.PatientRepository;
 import com.example.dust.services.AppointmentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,31 +24,38 @@ import java.util.List;
 @Service
 public class AppointmentServiceImpl implements AppointmentService{
 
-    private final AppointmentRepositoryImpl appointmentRepositoryImpl;
-    private final DoctorRepositoryImpl doctorRepositoryImpl;
-    private final PatientRepositoryImpl patientRepositoryImpl;
+    private final AppointmentRepository appointmentRepository;
+    private final DoctorRepository doctorRepository;
+    private final PatientRepository patientRepository;
     private ModelMapper modelMapper;
 
     @Autowired
-    public AppointmentServiceImpl(AppointmentRepositoryImpl appointmentRepositoryImpl, DoctorRepositoryImpl doctorRepositoryImpl, PatientRepositoryImpl patientRepositoryImpl) {
-        this.appointmentRepositoryImpl = appointmentRepositoryImpl;
-        this.doctorRepositoryImpl = doctorRepositoryImpl;
-        this.patientRepositoryImpl = patientRepositoryImpl;
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, DoctorRepository doctorRepository, PatientRepository patientRepository) {
+        this.appointmentRepository = appointmentRepository;
+        this.doctorRepository = doctorRepository;
+        this.patientRepository = patientRepository;
         this.modelMapper = new ModelMapper();
     }
 
 
     @Override
     public boolean isTimeAvailable(Doctor doctor, LocalDate date, LocalTime time, Patient patient) {
-        List<Appointment> appointments = appointmentRepositoryImpl.findByFkDoctorAndAppointmentDate(doctor, date);
+        List<Appointment> appointments = appointmentRepository.findByFkDoctorAndAppointmentDate(doctor, date)
+                .stream()
+                .filter(appointment -> !appointment.getStatus().equals(AppointmentStatus.CANCELLED) &&
+                        !appointment.getStatus().equals(AppointmentStatus.COMPLETED))
+                .collect(Collectors.toList());
+
         for (Appointment appointment : appointments) {
             if (appointment.getAppointmentTime().equals(time) || isTimeSlotConflicting(appointment.getAppointmentTime(), time)) {
                 return false;
             }
         }
-        if ((time.isAfter(LocalTime.of(12, 59)) && time.isBefore(LocalTime.of(14, 0)))) {
+
+        if (time.isAfter(LocalTime.of(12, 40)) && time.isBefore(LocalTime.of(14, 0))) {
             return false;
         }
+
         if (patient.getClientStatus().equals(PatientStatus.VIP) && time.isBefore(LocalTime.of(19, 0)) && time.isAfter(LocalTime.of(10, 0))) {
             return true;
         } else if (patient.getClientStatus().equals(PatientStatus.BASIC) && time.isBefore(LocalTime.of(18, 0)) && time.isAfter(LocalTime.of(10, 0))) {
@@ -58,15 +66,22 @@ public class AppointmentServiceImpl implements AppointmentService{
 
     @Override
     public boolean isTimeAvailable(Doctor doctor, LocalDate date, LocalTime time) {
-        List<Appointment> appointments = appointmentRepositoryImpl.findByFkDoctorAndAppointmentDate(doctor, date);
+        List<Appointment> appointments = appointmentRepository.findByFkDoctorAndAppointmentDate(doctor, date)
+                .stream()
+                .filter(appointment -> !appointment.getStatus().equals(AppointmentStatus.CANCELLED) &&
+                        !appointment.getStatus().equals(AppointmentStatus.COMPLETED))
+                .collect(Collectors.toList());
+
         for (Appointment appointment : appointments) {
             if (appointment.getAppointmentTime().equals(time) || isTimeSlotConflicting(appointment.getAppointmentTime(), time)) {
                 return false;
             }
         }
-        if ((time.isAfter(LocalTime.of(12, 59)) && time.isBefore(LocalTime.of(14, 0)))) {
+
+        if (time.isAfter(LocalTime.of(12, 40)) && time.isBefore(LocalTime.of(14, 0))) {
             return false;
         }
+
         return !time.isBefore(LocalTime.of(10, 0)) && !time.isAfter(LocalTime.of(18, 0));
     }
 
@@ -81,7 +96,7 @@ public class AppointmentServiceImpl implements AppointmentService{
     public Appointment completeAppointment(Appointment appointment) {
         if (!(appointment.getStatus().equals(AppointmentStatus.CANCELLED))) {
             appointment.setStatus(AppointmentStatus.COMPLETED);
-            return appointmentRepositoryImpl.save(appointment);
+            return appointmentRepository.save(appointment);
         }
         else{
             return null;
@@ -92,7 +107,7 @@ public class AppointmentServiceImpl implements AppointmentService{
     public Appointment cancelAppointment(Appointment appointment) {
         if (!(appointment.getStatus().equals(AppointmentStatus.COMPLETED))) {
             appointment.setStatus(AppointmentStatus.CANCELLED);
-            return appointmentRepositoryImpl.save(appointment);
+            return appointmentRepository.save(appointment);
         }
         else{
             return null;
@@ -101,28 +116,35 @@ public class AppointmentServiceImpl implements AppointmentService{
 
     @Override
     public List<AppointmentBookingDTO> getAHistory(Integer id) {
-        return appointmentRepositoryImpl.findByPatientId(id).stream()
+        return appointmentRepository.findByPatientId(id).stream()
                 .map(appointment -> modelMapper.map(appointment, AppointmentBookingDTO.class))
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<LocalTime> getAvailableTimeSlots(Integer doctorId, LocalDate date) {
-        Doctor doctor = doctorRepositoryImpl.findById(doctorId).orElseThrow();
-        List<Appointment> appointments = appointmentRepositoryImpl.findByFkDoctorAndAppointmentDate(doctor, date);
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();
+        List<Appointment> appointments = appointmentRepository.findByFkDoctorAndAppointmentDate(doctor, date)
+                .stream()
+                .filter(appointment -> !appointment.getStatus().equals(AppointmentStatus.CANCELLED) &&
+                        !appointment.getStatus().equals(AppointmentStatus.COMPLETED))
+                .collect(Collectors.toList());
+
         LocalTime startTime = LocalTime.of(10, 0);
         LocalTime endTime = LocalTime.of(18, 0);
-
         List<LocalTime> availableSlots = new ArrayList<>();
 
         for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(25)) {
             boolean isAvailable = true;
+
             for (Appointment appointment : appointments) {
                 if (isTimeSlotConflicting(time, appointment.getAppointmentTime())) {
                     isAvailable = false;
                     break;
                 }
             }
-            if (isAvailable && isTimeAvailable(doctor, date, time) && !(time.isAfter(LocalTime.of(12, 59)) && time.isBefore(LocalTime.of(14, 0)))) {
+
+            if (isAvailable && !(time.isAfter(LocalTime.of(12, 40)) && time.isBefore(LocalTime.of(14, 0)))) {
                 availableSlots.add(time);
             }
         }
@@ -131,13 +153,14 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
 
+    @Override
     public AppointmentBookingDTO create(AppointmentBookingDTO appointmentBookingDTO) {
-        Doctor doctor = doctorRepositoryImpl.findById(appointmentBookingDTO.getDoctorId()).orElseThrow();
-        Patient patient = patientRepositoryImpl.findById(appointmentBookingDTO.getPatientId()).orElseThrow();
+        Doctor doctor = doctorRepository.findById(appointmentBookingDTO.getDoctorId()).orElseThrow();
+        Patient patient = patientRepository.findById(appointmentBookingDTO.getPatientId()).orElseThrow();
         LocalDate appointmentDate = appointmentBookingDTO.getLocalDate();
         LocalTime appointmentTime = appointmentBookingDTO.getLocalTime();
 
-        List<Appointment> monthlyAppointments = appointmentRepositoryImpl.findByPatientId(patient.getId()).stream()
+        List<Appointment> monthlyAppointments = appointmentRepository.findByPatientId(patient.getId()).stream()
                 .filter(appointment -> appointment.getAppointmentDate().getMonth() == appointmentDate.getMonth() &&
                         appointment.getAppointmentDate().getYear() == appointmentDate.getYear())
                 .collect(Collectors.toList());
@@ -149,20 +172,26 @@ public class AppointmentServiceImpl implements AppointmentService{
         Appointment appointment = new Appointment(appointmentDate, appointmentTime, AppointmentStatus.BOOKED, doctor, patient);
 
         if (isTimeAvailable(doctor, appointmentDate, appointmentTime, patient)) {
-            return modelMapper.map(appointmentRepositoryImpl.save(appointment), AppointmentBookingDTO.class);
+            return modelMapper.map(appointmentRepository.save(appointment), AppointmentBookingDTO.class);
         } else {
             throw new RuntimeException("Time is not available");
         }
     }
 
+    @Override
     public Appointment getById(Integer id) {
-        return appointmentRepositoryImpl.findById(id).orElse(null);
+        return appointmentRepository.findById(id).orElse(null);
     }
 
-    public List<AppointmentBookingDTO> getAll() {
-        return appointmentRepositoryImpl.findAll().stream()
-                .map(appointment -> modelMapper.map(appointment, AppointmentBookingDTO.class))
+    @Override
+    public List<AppointmentDTO> getAll() {
+        return appointmentRepository.findAll().stream()
+                .map(appointment -> {
+                    AppointmentDTO appointmentDTO = modelMapper.map(appointment, AppointmentDTO.class);
+                    appointmentDTO.setDoctorName(appointment.getFkDoctor().getFirstname() + " " + appointment.getFkDoctor().getLastname());
+                    appointmentDTO.setPatientName(appointment.getFkPatient().getFirstname() + " " + appointment.getFkPatient().getLastname());
+                    return appointmentDTO;
+                })
                 .collect(Collectors.toList());
     }
-
 }

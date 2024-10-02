@@ -1,6 +1,6 @@
 package com.example.dust.controller;
 
-import com.example.dust.domain.Patient;
+
 import com.example.dust.dto.PatientDTO;
 import com.example.dust.services.impl.PatientServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;

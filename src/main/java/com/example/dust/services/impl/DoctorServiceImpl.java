@@ -7,6 +7,7 @@ import com.example.dust.services.DoctorService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,16 +19,21 @@ public class DoctorServiceImpl implements DoctorService {
     private final ModelMapper modelMapper;
 
     @Autowired
-    public DoctorServiceImpl(DoctorRepository doctorRepository) {
+    public DoctorServiceImpl(DoctorRepository doctorRepository, ModelMapper modelMapper) {
         this.doctorRepository = doctorRepository;
-        this.modelMapper = new ModelMapper();
+        this.modelMapper = modelMapper;
     }
 
+    @Transactional
     @Override
     public DoctorDTO create(DoctorDTO doctorDTO) {
         Doctor doctor = modelMapper.map(doctorDTO, Doctor.class);
-        doctorRepository.save(doctor);
-        return doctorDTO;
+
+        Doctor savedDoctor = doctorRepository.save(doctor);
+
+        DoctorDTO responseDTO = modelMapper.map(savedDoctor, DoctorDTO.class);
+        responseDTO.setId(savedDoctor.getId());
+        return responseDTO;
     }
 
     @Override
@@ -46,11 +52,16 @@ public class DoctorServiceImpl implements DoctorService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public DoctorDTO update(DoctorDTO doctorDTO) {
-        Doctor doctor = modelMapper.map(doctorDTO, Doctor.class);
-        Doctor updatedDoctor = doctorRepository.update(doctor);
-        return modelMapper.map(updatedDoctor, DoctorDTO.class);
+        Doctor doctor = doctorRepository.findById(doctorDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        modelMapper.map(doctorDTO, doctor);
+
+        Doctor updatedDoctor = doctorRepository.save(doctor);
+        DoctorDTO responseDTO = modelMapper.map(updatedDoctor, DoctorDTO.class);
+        return responseDTO;
     }
 
     @Override

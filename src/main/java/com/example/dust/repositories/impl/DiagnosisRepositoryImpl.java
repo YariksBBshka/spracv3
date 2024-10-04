@@ -8,7 +8,6 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class DiagnosisRepositoryImpl extends BaseRepository<Diagnosis, Integer> implements DiagnosisRepository {

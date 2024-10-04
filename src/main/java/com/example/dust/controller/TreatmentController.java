@@ -2,8 +2,7 @@ package com.example.dust.controller;
 
 
 import com.example.dust.dto.TreatmentDTO;
-import com.example.dust.services.impl.DiagnosisServiceImpl;
-import com.example.dust.services.impl.TreatmentServiceImpl;
+import com.example.dust.services.TreatmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,13 +12,11 @@ import java.util.List;
 @RequestMapping("/treatment")
 public class TreatmentController {
 
-    private final TreatmentServiceImpl treatmentService;
-    private final DiagnosisServiceImpl diagnosisService;
+    private final TreatmentService treatmentService;
 
     @Autowired
-    public TreatmentController(TreatmentServiceImpl treatmentService, DiagnosisServiceImpl diagnosisServiceImpl) {
+    public TreatmentController(TreatmentService treatmentService) {
         this.treatmentService = treatmentService;
-        this.diagnosisService = diagnosisServiceImpl;
     }
 
     @PostMapping("/create")
@@ -32,19 +29,14 @@ public class TreatmentController {
         return treatmentService.getById(id);
     }
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public List<TreatmentDTO> getAllTreatments() {
         return treatmentService.getAll();
     }
 
-    @PutMapping("/update/{id}")
-    public TreatmentDTO updateTreatment(@PathVariable Integer id, @RequestBody TreatmentDTO treatmentDTO) {
-        TreatmentDTO existingTreatment = treatmentService.getById(id);
-        if (existingTreatment != null) {
-            return treatmentService.update(treatmentDTO);
-        } else {
-            throw new RuntimeException("Treatment not found");
-        }
+    @PutMapping("/update")
+    public TreatmentDTO updateTreatment(@RequestBody TreatmentDTO treatmentDTO) {
+        return treatmentService.update(treatmentDTO);
     }
 
     @GetMapping("/treatments/{patientId}")

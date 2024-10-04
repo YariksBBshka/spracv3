@@ -1,6 +1,7 @@
 package com.example.dust.dto;
 
 public class DoctorDTO {
+    private Integer id;
     private String firstname;
     private String lastname;
     private String speciality;
@@ -36,5 +37,13 @@ public class DoctorDTO {
 
     public void setRoomNumber(Integer roomNumber) {
         this.roomNumber = roomNumber;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

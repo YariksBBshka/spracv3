@@ -14,7 +14,6 @@ public class Patient extends BaseEntity {
     private String address;
     private String phoneNumber;
     private PatientStatus clientStatus;
-//    private List<Appointment> appointments;
 
     @Column(name = "firstname", nullable = false, length = 100)
     public String getFirstname() {
@@ -78,13 +77,5 @@ public class Patient extends BaseEntity {
         this.clientStatus = clientStatus;
     }
 
-
-//    public void setAppointments(List<Appointment> appointments) {
-//        this.appointments = appointments;
-//    }
-//    @OneToMany(mappedBy = "fkPatient", fetch = FetchType.LAZY)
-//    public List<Appointment> getAppointments() {
-//        return appointments;
-//    }
 
 }

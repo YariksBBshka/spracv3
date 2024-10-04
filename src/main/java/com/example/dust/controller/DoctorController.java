@@ -1,7 +1,7 @@
 package com.example.dust.controller;
 
 import com.example.dust.dto.DoctorDTO;
-import com.example.dust.services.impl.DoctorServiceImpl;
+import com.example.dust.services.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,14 +11,14 @@ import java.util.List;
 @RequestMapping("/doctor")
 public class DoctorController {
 
-    @Autowired
-    private DoctorServiceImpl doctorService;
+    private final DoctorService doctorService;
 
-    public DoctorController(DoctorServiceImpl doctorService) {
+    @Autowired
+    public DoctorController(DoctorService doctorService) {
         this.doctorService = doctorService;
     }
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public List<DoctorDTO> getAllDoctors() {
         return doctorService.getAll();
     }
@@ -33,14 +33,9 @@ public class DoctorController {
         return doctorService.getById(id);
     }
 
-    @PutMapping("/update/{id}")
-    public DoctorDTO updateDoctor(@PathVariable Integer id, @RequestBody DoctorDTO doctorDTO) {
-        DoctorDTO existingDoctor = doctorService.getById(id);
-        if (existingDoctor != null) {
-            return doctorService.update(doctorDTO);
-        } else {
-            throw new RuntimeException("Doctor not found");
-        }
+    @PutMapping("/update")
+    public DoctorDTO updateDoctor(@RequestBody DoctorDTO doctorDTO) {
+        return doctorService.update(doctorDTO);
     }
 
     @GetMapping("/search/speciality")

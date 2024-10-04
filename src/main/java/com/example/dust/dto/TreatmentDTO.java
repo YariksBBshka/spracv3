@@ -5,7 +5,7 @@ public class TreatmentDTO {
     private Integer id;
     private String medication;
     private String instructions;
-    private DiagnosisDTO fkDiagnosis;
+    private Integer diagnosisId;
 
     public Integer getId() {
         return id;
@@ -31,11 +31,11 @@ public class TreatmentDTO {
         this.instructions = instructions;
     }
 
-    public DiagnosisDTO getFkDiagnosis() {
-        return fkDiagnosis;
+    public Integer getDiagnosisId() {
+        return diagnosisId;
     }
 
-    public void setFkDiagnosis(DiagnosisDTO fkDiagnosis) {
-        this.fkDiagnosis = fkDiagnosis;
+    public void setDiagnosisId(Integer diagnosisId) {
+        this.diagnosisId = diagnosisId;
     }
 }

@@ -9,7 +9,6 @@ public class Diagnosis extends BaseEntity {
     private String disease;
     private String description;
     private Appointment fkAppointment;
-//    private List<Treatment> treatments;
 
     @Column(name = "disease", nullable = false)
     public String getDisease() {
@@ -47,16 +46,5 @@ public class Diagnosis extends BaseEntity {
     public void setFkAppointment(Appointment fkAppointment) {
         this.fkAppointment = fkAppointment;
     }
-
-
-//    @OneToMany(mappedBy = "fkDiagnosis")
-//    public List<Treatment> getTreatments() {
-//        return treatments;
-//    }
-//
-//
-//    public void setTreatments(List<Treatment> treatments) {
-//        this.treatments = treatments;
-//    }
 
 }

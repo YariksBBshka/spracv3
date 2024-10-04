@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface AppointmentRepository {
     List<Appointment> findByPatientId(Integer id);
     List<Appointment> findByFkDoctorAndAppointmentDate(Doctor doctor, LocalDate date);
+    List<Appointment> findByAppointmentDate(LocalDate date);
     Appointment save(Appointment appointment);
     List<Appointment> findAll();
     Appointment update(Appointment appointment);

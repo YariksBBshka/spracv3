@@ -1,8 +1,7 @@
 package com.example.dust.controller;
 
-
 import com.example.dust.dto.PatientDTO;
-import com.example.dust.services.impl.PatientServiceImpl;
+import com.example.dust.services.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,14 +11,14 @@ import java.util.List;
 @RequestMapping("/patient")
 public class PatientController {
 
-    private final PatientServiceImpl patientService;
+    private final PatientService patientService;
 
     @Autowired
-    public PatientController(PatientServiceImpl patientService) {
+    public PatientController(PatientService patientService) {
         this.patientService = patientService;
     }
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public List<PatientDTO> getAllPatients() {
         return patientService.getAll();
     }
@@ -34,9 +33,8 @@ public class PatientController {
         return patientService.create(patientDTO);
     }
 
-    @PutMapping("/update/{id}")
-    public PatientDTO updatePatient(@PathVariable Integer id, @RequestBody PatientDTO patientDTO) {
-        patientDTO.setId(id);
+    @PutMapping("/update")
+    public PatientDTO updatePatient(@RequestBody PatientDTO patientDTO) {
         return patientService.update(patientDTO);
     }
 

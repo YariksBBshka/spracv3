@@ -33,5 +33,12 @@ public class AppointmentRepositoryImpl extends BaseRepository<Appointment, Integ
                 .setParameter("date", date)
                 .getResultList();
     }
+
+    @Override
+    public List<Appointment> findByAppointmentDate(LocalDate date) {
+        return entityManager.createQuery("SELECT a FROM Appointment a WHERE a.appointmentDate = :date", Appointment.class)
+                .setParameter("date", date)
+                .getResultList();
+    }
 }
 

@@ -1,6 +1,8 @@
 package com.example.dust.services.impl;
 
 import com.example.dust.domain.Patient;
+import com.example.dust.domain.enums.PatientStatus;
+import com.example.dust.dto.DiagnosisDTO;
 import com.example.dust.dto.PatientDTO;
 import com.example.dust.repositories.PatientRepository;
 import com.example.dust.repositories.impl.PatientRepositoryImpl;
@@ -8,6 +10,7 @@ import com.example.dust.services.PatientService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,15 +22,21 @@ public class PatientServiceImpl implements PatientService {
     private final ModelMapper modelMapper;
 
     @Autowired
-    public PatientServiceImpl(PatientRepositoryImpl patientRepository) {
+    public PatientServiceImpl(PatientRepositoryImpl patientRepository, ModelMapper modelMapper) {
         this.patientRepository = patientRepository;
-        this.modelMapper = new ModelMapper();
+        this.modelMapper = modelMapper;
     }
 
+    @Transactional
+    @Override
     public PatientDTO create(PatientDTO patientDTO) {
         Patient patient = modelMapper.map(patientDTO, Patient.class);
-        patientRepository.save(patient);
-        return patientDTO;
+        patient.setClientStatus(PatientStatus.valueOf(patientDTO.getClientStatus().toUpperCase()));
+
+        Patient savedPatient = patientRepository.save(patient);
+        PatientDTO responseDTO = modelMapper.map(savedPatient, PatientDTO.class);
+        responseDTO.setId(savedPatient.getId());
+        return responseDTO;
     }
 
     @Override
@@ -46,12 +55,17 @@ public class PatientServiceImpl implements PatientService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public PatientDTO update(PatientDTO patientDTO) {
-        Patient patient = modelMapper.map(patientDTO, Patient.class);
-        Patient updatedPatient = patientRepository.update(patient);
-        return modelMapper.map(updatedPatient, PatientDTO.class);
+        Patient patient = patientRepository.findById(patientDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        modelMapper.map(patientDTO, patient);
+        Patient updatedPatient = patientRepository.save(patient);
+        PatientDTO responseDTO = modelMapper.map(updatedPatient, PatientDTO.class);
+        return responseDTO;
     }
+
 
     @Override
     public PatientDTO findByPhoneNumber(String phoneNumber) {

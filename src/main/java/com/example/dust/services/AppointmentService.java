@@ -22,6 +22,9 @@ public interface AppointmentService{
     List<AppointmentBookingDTO> getAHistory(Integer id);
     List<LocalTime> getAvailableTimeSlots(Integer doctorId, LocalDate date);
     AppointmentBookingDTO create(AppointmentBookingDTO appointmentBookingDTO);
+    AppointmentBookingDTO createExclusion(AppointmentBookingDTO appointmentBookingDTO);
     Appointment getById(Integer id);
     List<AppointmentDTO> getAll();
+    List<AppointmentDTO> findByDate(LocalDate date);
+
 }

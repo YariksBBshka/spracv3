@@ -2,8 +2,8 @@ package com.example.dust.controller;
 
 import com.example.dust.domain.Appointment;
 import com.example.dust.dto.DiagnosisDTO;
-import com.example.dust.services.impl.AppointmentServiceImpl;
-import com.example.dust.services.impl.DiagnosisServiceImpl;
+import com.example.dust.services.AppointmentService;
+import com.example.dust.services.DiagnosisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,11 +13,11 @@ import java.util.List;
 @RequestMapping("/diagnosis")
 public class DiagnosisController {
 
-    private final DiagnosisServiceImpl diagnosisService;
-    private final AppointmentServiceImpl appointmentServiceImpl;
+    private final DiagnosisService diagnosisService;
+    private final AppointmentService appointmentServiceImpl;
 
     @Autowired
-    public DiagnosisController(DiagnosisServiceImpl diagnosisService, AppointmentServiceImpl appointmentServiceImpl) {
+    public DiagnosisController(DiagnosisService diagnosisService, AppointmentService appointmentServiceImpl) {
         this.diagnosisService = diagnosisService;
         this.appointmentServiceImpl = appointmentServiceImpl;
     }
